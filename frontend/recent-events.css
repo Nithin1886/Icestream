@@ -1,0 +1,329 @@
+/* IceStream — Recent Events toolbar UI */
+
+#recent-events-table {
+  padding: 24px 26px 0;
+}
+
+#recent-events-table .table-controls-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 20px;
+  min-width: 0;
+}
+
+#recent-events-table .table-controls-header > .card-title {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  color: #52627a;
+  font-size: 0.76rem;
+  font-weight: 650;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+#recent-events-table .table-filters {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+#recent-events-table .search-box,
+#recent-events-table .filter-select-wrapper {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  border: 1px solid rgba(71, 85, 105, 0.28);
+  background: rgba(15, 23, 42, 0.68);
+  border-radius: 10px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+#recent-events-table .search-box {
+  width: 248px;
+  flex: 0 1 248px;
+}
+
+#recent-events-table .filter-select-wrapper {
+  width: 152px;
+  flex: 0 0 152px;
+}
+
+#recent-events-table .search-box:focus-within,
+#recent-events-table .filter-select-wrapper:focus-within {
+  border-color: rgba(34, 211, 238, 0.55);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.07), 0 0 18px rgba(34, 211, 238, 0.06);
+  background: rgba(15, 23, 42, 0.9);
+}
+
+#recent-events-table .search-icon,
+#recent-events-table .select-icon {
+  position: absolute;
+  left: 12px;
+  color: #53657e;
+  pointer-events: none;
+  z-index: 2;
+}
+
+#recent-events-table .search-box input,
+#recent-events-table .filter-select-wrapper select {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  color: #94a3b8;
+  background: transparent;
+  font: 500 0.78rem/1 "Inter", sans-serif;
+}
+
+#recent-events-table .search-box input {
+  padding: 0 34px 0 36px;
+}
+
+#recent-events-table .search-box input::placeholder {
+  color: #64748b;
+}
+
+#recent-events-table .filter-select-wrapper select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0 30px 0 34px;
+  cursor: pointer;
+}
+
+#recent-events-table .filter-select-wrapper::after {
+  content: "⌄";
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  color: #64748b;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+#recent-events-table .filter-select-wrapper option {
+  background: #0b1120;
+  color: #cbd5e1;
+}
+
+#recent-events-table .clear-search {
+  position: absolute;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+}
+
+#recent-events-table .clear-search:hover {
+  color: #e2e8f0;
+  background: rgba(148, 163, 184, 0.08);
+}
+
+#recent-events-table .status-tabs {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid rgba(71, 85, 105, 0.28);
+  background: rgba(15, 23, 42, 0.68);
+  border-radius: 10px;
+  flex: 0 0 auto;
+}
+
+#recent-events-table .tab-btn {
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #8796aa;
+  font: 600 0.73rem/1 "Inter", sans-serif;
+  text-transform: capitalize;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+#recent-events-table .tab-btn:hover {
+  color: #dbe7f3;
+  background: rgba(148, 163, 184, 0.07);
+}
+
+#recent-events-table .tab-btn.active {
+  color: #dbeafe;
+  background: rgba(14, 116, 144, 0.34);
+  box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.2), 0 0 15px rgba(34, 211, 238, 0.08);
+}
+
+#recent-events-table .tab-btn.success.active {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.13);
+  box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16);
+}
+
+#recent-events-table .tab-btn.warning.active {
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16);
+}
+
+#recent-events-table .tab-btn.error.active {
+  color: #fda4af;
+  background: rgba(244, 63, 94, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(251, 113, 133, 0.16);
+}
+
+/* Counts match the reference UI while remaining visually secondary. */
+#recent-events-table .tab-btn::after {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 19px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.16);
+  color: #718096;
+  font-size: 0.64rem;
+  font-weight: 700;
+}
+
+#recent-events-table .tab-btn:nth-child(1)::after { content: "25"; }
+#recent-events-table .tab-btn:nth-child(2)::after { content: "17"; }
+#recent-events-table .tab-btn:nth-child(3)::after { content: "4"; }
+#recent-events-table .tab-btn:nth-child(4)::after { content: "4"; }
+
+#recent-events-table .tab-btn.active::after {
+  background: rgba(34, 211, 238, 0.16);
+  color: #67e8f9;
+}
+
+#recent-events-table .tab-btn.success.active::after {
+  background: rgba(52, 211, 153, 0.14);
+  color: #6ee7b7;
+}
+
+#recent-events-table .tab-btn.warning.active::after {
+  background: rgba(251, 191, 36, 0.14);
+  color: #fcd34d;
+}
+
+#recent-events-table .tab-btn.error.active::after {
+  background: rgba(251, 113, 133, 0.14);
+  color: #fda4af;
+}
+
+#recent-events-table .btn-secondary {
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 0 14px;
+  border: 1px solid rgba(34, 211, 238, 0.34);
+  border-radius: 9px;
+  background: rgba(8, 47, 73, 0.38);
+  color: #22d3ee;
+  font: 650 0.74rem/1 "Inter", sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#recent-events-table .btn-secondary:hover {
+  border-color: rgba(34, 211, 238, 0.65);
+  background: rgba(8, 145, 178, 0.13);
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.1);
+  transform: translateY(-1px);
+}
+
+#recent-events-table .btn-icon {
+  width: 30px;
+  height: 30px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(100, 116, 139, 0.18);
+  border-radius: 7px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+#recent-events-table .btn-icon:hover {
+  color: #67e8f9;
+  border-color: rgba(34, 211, 238, 0.35);
+  background: rgba(8, 47, 73, 0.45);
+}
+
+#recent-events-table .events-table tbody tr:hover .btn-icon {
+  opacity: 1;
+}
+
+#recent-events-table .events-table-wrapper {
+  border-top: 1px solid rgba(148, 163, 184, 0.05);
+}
+
+#recent-events-table .events-table thead th {
+  height: 44px;
+  padding: 0 16px;
+  color: #52627a;
+  background: rgba(10, 17, 34, 0.7);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+}
+
+#recent-events-table .events-table tbody td {
+  height: 58px;
+  padding: 0 16px;
+}
+
+@media (max-width: 1180px) {
+  #recent-events-table .table-controls-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  #recent-events-table .table-filters {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 720px) {
+  #recent-events-table .search-box,
+  #recent-events-table .filter-select-wrapper {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  #recent-events-table .status-tabs {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  #recent-events-table .tab-btn {
+    flex: 1;
+    padding: 0 5px;
+  }
+
+  #recent-events-table .btn-secondary {
+    width: 100%;
+  }
+}
