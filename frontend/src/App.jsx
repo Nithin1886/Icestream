@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import {
   Snowflake,
   Clock,
-  Wifi,
   Bell,
   Pause,
   Play,
   RotateCw,
   Database,
-  ShieldAlert,
+  Key,
+  CheckCircle2,
 } from "lucide-react";
 import { serviceStatuses, systemAlerts, generateRecentEvents } from "./data/dummyData";
 import {
@@ -25,11 +25,15 @@ import RecentEventsTable from "./components/RecentEventsTable";
 import DataLineageDag from "./components/DataLineageDag";
 import AnomalyControlPanel from "./components/AnomalyControlPanel";
 import IcebergTimeTravel from "./components/IcebergTimeTravel";
+import SettingsModal from "./components/SettingsModal";
 
 function App() {
   const [clock, setClock] = useState(formatClock());
   const [isLive, setIsLive] = useState(true);
   const [showAlerts, setShowAlerts] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
   const [events, setEvents] = useState(() => generateRecentEvents(20));
   const [statuses, setStatuses] = useState(serviceStatuses);
   const [backendConnected, setBackendConnected] = useState(false);
@@ -37,6 +41,7 @@ function App() {
     quarantineActive: false,
     taxNullRatio: 0,
     refetchCount: 0,
+    totalQuarantinedRecords: 0,
   });
   const [timeRange, setTimeRange] = useState("30m");
 
@@ -47,6 +52,13 @@ function App() {
       second: "2-digit",
       hour12: false,
     });
+  }
+
+  function showToast(msg) {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3500);
   }
 
   // Live clock tick
@@ -103,10 +115,19 @@ function App() {
 
   function handleRefresh() {
     refreshObservabilityState();
+    showToast("Dashboard data refreshed.");
   }
 
   return (
     <div className="dashboard">
+      {/* ── Toast Notification Banner ─────────────────────────────────────── */}
+      {toastMessage && (
+        <div className="toast-notification animate-in">
+          <CheckCircle2 size={16} className="text-green" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <header className="dashboard-header">
         <div className="header-brand">
@@ -153,43 +174,73 @@ function App() {
           </div>
 
           {/* Time Range Selector */}
-          <select
-            className="btn-header"
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-          >
-            <option value="5m">Last 5m</option>
-            <option value="15m">Last 15m</option>
-            <option value="30m">Last 30m</option>
-            <option value="1h">Last 1h</option>
-          </select>
+          <div className="time-range-wrapper">
+            <select
+              className="time-range-select"
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+            >
+              <option value="5m">Last 5m</option>
+              <option value="15m">Last 15m</option>
+              <option value="30m">Last 30m</option>
+              <option value="1h">Last 1h</option>
+            </select>
+          </div>
 
-          {/* Pause / Play Live Stream Stream Controls */}
+          {/* Pause / Play Live Stream Controls */}
           <button
-            className={`btn-header ${isLive ? "active" : ""}`}
-            onClick={() => setIsLive(!isLive)}
-            title={isLive ? "Pause Live Stream" : "Resume Live Stream"}
+            className={`btn-live-control ${isLive ? "live-active" : "paused-active"}`}
+            onClick={() => {
+              setIsLive(!isLive);
+              showToast(isLive ? "Live stream paused." : "Live stream resumed.");
+            }}
+            title={isLive ? "Pause Live Streaming" : "Resume Live Streaming"}
           >
-            {isLive ? <Pause size={14} /> : <Play size={14} />}
-            {isLive ? "Live" : "Paused"}
+            {isLive ? (
+              <>
+                <span className="live-pulse-ring" />
+                <Pause size={13} />
+                <span>LIVE STREAM</span>
+              </>
+            ) : (
+              <>
+                <Play size={13} />
+                <span>PAUSED</span>
+              </>
+            )}
           </button>
 
-          {/* Refresh Button */}
+          {/* Refresh Telemetry Data Button */}
           <button
-            className="btn-header"
-            onClick={handleRefresh}
-            title="Refresh Data"
+            className={`btn-header-action ${isRefreshing ? "refreshing" : ""}`}
+            onClick={() => {
+              setIsRefreshing(true);
+              handleRefresh();
+              setTimeout(() => setIsRefreshing(false), 800);
+            }}
+            title="Refresh Telemetry Data"
           >
-            <RotateCw size={14} />
+            <RotateCw size={14} className={isRefreshing ? "spin-icon" : ""} />
+            <span>Refresh</span>
+          </button>
+
+          {/* Settings & API Keys Button */}
+          <button
+            className="btn-header-action btn-settings-icon"
+            onClick={() => setShowSettings(true)}
+            title="API Keys & Integration Settings"
+          >
+            <Key size={14} className="text-cyan" />
+            <span>Settings</span>
           </button>
 
           {/* Alerts Bell Popover Trigger */}
           <button
-            className="btn-header btn-header-icon"
+            className={`btn-header-action btn-bell-icon ${showAlerts ? "active" : ""}`}
             onClick={() => setShowAlerts(!showAlerts)}
-            title="System Alerts"
+            title="System Notifications & Alerts"
           >
-            <Bell size={15} />
+            <Bell size={14} />
             {systemAlerts.length > 0 && (
               <span className="alert-badge-count">{systemAlerts.length}</span>
             )}
@@ -247,6 +298,13 @@ function App() {
       {/* ── E-Commerce Telemetry Event Stream ───────────────────────────── */}
       <div className="section-title">E-Commerce Telemetry Stream (Live Checkout Events)</div>
       <RecentEventsTable events={events} />
+
+      {/* ── Settings & API Keys Modal ────────────────────────────────────── */}
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        onSaveToast={showToast}
+      />
     </div>
   );
 }
