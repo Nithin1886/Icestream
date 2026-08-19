@@ -25,7 +25,80 @@ import RecentEventsTable from "./components/RecentEventsTable";
 import DataLineageDag from "./components/DataLineageDag";
 import AnomalyControlPanel from "./components/AnomalyControlPanel";
 import IcebergTimeTravel from "./components/IcebergTimeTravel";
-import SettingsModal from "./components/SettingsModal";
+
+function SettingsModal({ isOpen, onClose, onSaveToast }) {
+  const [apiKey, setApiKey] = useState("");
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 1000,
+        background: "rgba(0,0,0,.65)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 24,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          width: "min(520px, 100%)",
+          background: "#0b1120",
+          border: "1px solid rgba(255,255,255,.12)",
+          borderRadius: 16,
+          padding: 24,
+          boxShadow: "0 25px 80px rgba(0,0,0,.45)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 16, marginBottom: 18 }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 18 }}>Integration Settings</div>
+            <div style={{ opacity: 0.6, fontSize: 13, marginTop: 4 }}>API keys and dashboard connections</div>
+          </div>
+          <button className="btn-header-action" onClick={onClose}>Close</button>
+        </div>
+
+        <label style={{ display: "block", fontSize: 13, opacity: 0.7, marginBottom: 8 }}>
+          API Key
+        </label>
+        <input
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          placeholder="Enter API key"
+          type="password"
+          style={{
+            width: "100%",
+            boxSizing: "border-box",
+            padding: "12px 14px",
+            borderRadius: 10,
+            border: "1px solid rgba(255,255,255,.12)",
+            background: "#111827",
+            color: "inherit",
+            outline: "none",
+            marginBottom: 14,
+          }}
+        />
+
+        <button
+          className="btn-header-action btn-settings-icon"
+          onClick={() => {
+            onSaveToast("Settings saved.");
+            onClose();
+          }}
+        >
+          <Key size={14} className="text-cyan" />
+          <span>Save Settings</span>
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   const [clock, setClock] = useState(formatClock());
@@ -61,13 +134,11 @@ function App() {
     }, 3500);
   }
 
-  // Live clock tick
   useEffect(() => {
     const id = setInterval(() => setClock(formatClock()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  // Poll observability state & health
   async function refreshObservabilityState() {
     const health = await fetchHealth();
     if (health && health.status === "healthy") {
@@ -87,7 +158,6 @@ function App() {
     refreshObservabilityState();
   }, []);
 
-  // Streaming loop
   useEffect(() => {
     if (!isLive) return;
 
@@ -103,7 +173,6 @@ function App() {
         }
       }
 
-      // Fallback local simulation
       setEvents((prev) => {
         const newEvents = generateRecentEvents(1);
         return [newEvents[0], ...prev.slice(0, 24)];
@@ -120,7 +189,6 @@ function App() {
 
   return (
     <div className="dashboard">
-      {/* ── Toast Notification Banner ─────────────────────────────────────── */}
       {toastMessage && (
         <div className="toast-notification animate-in">
           <CheckCircle2 size={16} className="text-green" />
@@ -128,7 +196,6 @@ function App() {
         </div>
       )}
 
-      {/* ── Header ──────────────────────────────────────────────────────── */}
       <header className="dashboard-header">
         <div className="header-brand">
           <div className="header-logo">
@@ -173,7 +240,6 @@ function App() {
               : "Local Simulation"}
           </div>
 
-          {/* Time Range Selector */}
           <div className="time-range-wrapper">
             <select
               className="time-range-select"
@@ -187,7 +253,6 @@ function App() {
             </select>
           </div>
 
-          {/* Pause / Play Live Stream Controls */}
           <button
             className={`btn-live-control ${isLive ? "live-active" : "paused-active"}`}
             onClick={() => {
@@ -210,7 +275,6 @@ function App() {
             )}
           </button>
 
-          {/* Refresh Telemetry Data Button */}
           <button
             className={`btn-header-action ${isRefreshing ? "refreshing" : ""}`}
             onClick={() => {
@@ -224,7 +288,6 @@ function App() {
             <span>Refresh</span>
           </button>
 
-          {/* Settings & API Keys Button */}
           <button
             className="btn-header-action btn-settings-icon"
             onClick={() => setShowSettings(true)}
@@ -234,7 +297,6 @@ function App() {
             <span>Settings</span>
           </button>
 
-          {/* Alerts Bell Popover Trigger */}
           <button
             className={`btn-header-action btn-bell-icon ${showAlerts ? "active" : ""}`}
             onClick={() => setShowAlerts(!showAlerts)}
@@ -246,7 +308,6 @@ function App() {
             )}
           </button>
 
-          {/* Alerts Popover Panel */}
           {showAlerts && (
             <div className="alerts-popover">
               <div className="alerts-header">
@@ -266,16 +327,13 @@ function App() {
         </div>
       </header>
 
-      {/* ── Interactive Anomaly & Automated Quarantine Control Panel ─────── */}
       <AnomalyControlPanel
         quarantineState={quarantineState}
         onStateChange={refreshObservabilityState}
       />
 
-      {/* ── React Flow Data Lineage DAG ──────────────────────────────────── */}
       <DataLineageDag quarantineState={quarantineState} />
 
-      {/* ── Infrastructure Status Cards ──────────────────────────────────── */}
       <div className="section-title">Infrastructure & Observability Health</div>
       <div className="status-grid">
         <StatusCard serviceKey="kafka" data={statuses.kafka || serviceStatuses.kafka} />
@@ -284,22 +342,18 @@ function App() {
         <LiveEventCounter />
       </div>
 
-      {/* ── Apache Iceberg Open Table Format Engine ───────────────────────── */}
       <div className="section-title">Data Lakehouse Table Format</div>
       <IcebergTimeTravel />
 
-      {/* ── Analytics Overview (Throughput + Validation) ────────────────── */}
       <div className="section-title">Analytics & Data Quality Overview</div>
       <div className="middle-grid">
         <ThroughputChart />
         <ValidationMetrics />
       </div>
 
-      {/* ── E-Commerce Telemetry Event Stream ───────────────────────────── */}
       <div className="section-title">E-Commerce Telemetry Stream (Live Checkout Events)</div>
       <RecentEventsTable events={events} />
 
-      {/* ── Settings & API Keys Modal ────────────────────────────────────── */}
       <SettingsModal
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
